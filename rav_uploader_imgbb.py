@@ -91,17 +91,23 @@ async def on_message(message: discord.Message):
 # -------------------------------
 # Minimal web server for Render
 # -------------------------------
+from aiohttp import web
+
 async def handle(request):
     return web.Response(text="Bot is running ✅")
 
-app = web.Application()
-app.router.add_get("/", handle)
+async def start_web():
+    app = web.Application()
+    app.router.add_get("/", handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", 10000)
+    await site.start()
+    print("🌐 Web server running on port 10000")
 
-def run_web():
-    web.run_app(app, host="0.0.0.0", port=10000)
-
-# Run the web server in a background thread
-threading.Thread(target=run_web, daemon=True).start()
+# Start the web server in the same asyncio loop as Discord
+client.loop.create_task(start_web())
 
 # Start Discord bot
 client.run(TOKEN)
+
