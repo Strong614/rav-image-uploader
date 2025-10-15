@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import discord
 import base64
 import asyncio
+from aiohttp import web
+import threading
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -86,4 +88,20 @@ async def on_message(message: discord.Message):
             embed.set_footer(text=f"Uploaded by {message.author.display_name}")
             await message.reply(embed=embed)
 
+# -------------------------------
+# Minimal web server for Render
+# -------------------------------
+async def handle(request):
+    return web.Response(text="Bot is running ✅")
+
+app = web.Application()
+app.router.add_get("/", handle)
+
+def run_web():
+    web.run_app(app, host="0.0.0.0", port=10000)
+
+# Run the web server in a background thread
+threading.Thread(target=run_web, daemon=True).start()
+
+# Start Discord bot
 client.run(TOKEN)
