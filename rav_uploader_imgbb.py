@@ -105,9 +105,13 @@ async def start_web():
     await site.start()
     print("🌐 Web server running on port 10000")
 
-# Start the web server in the same asyncio loop as Discord
-client.loop.create_task(start_web())
+# Use setup_hook to start the web server before bot connects
+class MyClient(discord.Client):
+    async def setup_hook(self):
+        self.loop.create_task(start_web())
 
-# Start Discord bot
+client = MyClient(intents=intents)
+
+# Everything else remains the same
 client.run(TOKEN)
 
